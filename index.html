@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modo Wayne</title>
+<meta name="theme-color" content="#0B0E13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Modo Wayne">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E13; --panel:#141A22; --line:#232C37; --steel:#7C8A9B;
+    --bone:#E9E4D6; --signal:#F2C94C; --signal-dim:#8A7322;
+    --safe-top: env(safe-area-inset-top, 0px); --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--bone);font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{background:
+    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(242,201,76,.10), transparent 60%),
+    repeating-linear-gradient(180deg, transparent 0 38px, rgba(255,255,255,.012) 38px 39px),
+    var(--bg)}
+  .disp{font-family:'Oswald','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.06em}
+  .mono{font-family:'IBM Plex Mono',monospace}
+  .wrap{max-width:480px;margin:0 auto;padding:calc(22px + var(--safe-top)) 20px calc(48px + var(--safe-bot))}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);letter-spacing:.12em}
+
+  header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:14px}
+  header h1{margin:4px 0 0;font-size:34px;font-weight:700;line-height:1}
+  header h1 span{color:var(--signal)}
+  #data{font-size:11px;color:var(--steel);text-align:right;text-transform:capitalize;max-width:45%}
+
+  .sinal{display:flex;align-items:center;gap:18px;padding:22px 0 10px}
+  .sinal svg{flex-shrink:0}
+  .ring{transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1),filter .6s}
+  .bat{transition:fill .4s,filter .4s}
+  .seq{font-size:40px;font-weight:700;line-height:1}
+  .seq small{font-size:16px;color:var(--steel);letter-spacing:.04em}
+  .seq.on{color:var(--signal)}
+  .msg{font-size:13px;color:var(--steel);margin-top:6px;line-height:1.4}
+
+  .pilares{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .pilar{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 14px 12px;color:var(--bone);cursor:pointer;
+    transition:background .18s,border-color .18s,transform .08s,box-shadow .3s;font:inherit}
+  .pilar:active{transform:scale(.98)}
+  .pilar .top{display:flex;justify-content:space-between;align-items:center}
+  .pilar .box{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--steel)}
+  .pilar .nome{font-size:22px;font-weight:500;margin-top:6px}
+  .pilar .streak{font-size:11px;color:var(--steel);margin-top:4px}
+  .pilar.ok{background:#1C1F16;border-color:var(--signal-dim);box-shadow:inset 0 0 0 1px rgba(242,201,76,.12),0 0 18px -6px rgba(242,201,76,.35)}
+  .pilar.ok .box{border-color:var(--signal);background:var(--signal)}
+  .pilar.ok .nome{color:var(--signal)}
+
+  .campo{margin-top:22px}
+  .campo .eyebrow{display:block;margin-bottom:6px}
+  input[type=text]{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--bone);padding:12px 14px;font-size:15px;font-family:inherit}
+  input[type=text]::placeholder{color:#5E6B7B}
+  input[type=range]{width:100%;accent-color:var(--signal);margin-top:8px}
+  :focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+  .missao{margin-top:28px;border-top:1px solid var(--line);padding-top:18px}
+  .missao .head{display:flex;justify-content:space-between;align-items:baseline}
+  .missao h2{margin:0;font-size:24px;font-weight:700}
+  .missao .pct{font-size:28px;color:var(--signal);font-weight:700}
+  .barra{height:4px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden}
+  .barra div{height:100%;background:var(--signal);transition:width .4s;width:0}
+  .metas{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+  .meta{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+  .meta .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .meta .t{font-size:15px;font-weight:500;line-height:1.35}
+  .meta .r{display:flex;gap:10px;align-items:center;flex-shrink:0}
+  .meta .p{font-size:13px;color:var(--steel)}
+  .meta .p.full{color:var(--signal)}
+  .x{background:none;border:none;color:var(--steel);cursor:pointer;font-size:18px;padding:0 2px;line-height:1}
+  .vazio{font-size:13px;color:var(--steel);padding:6px 2px}
+  .add{display:flex;gap:8px;margin-top:12px}
+  .add input{flex:1;min-width:0;font-size:14px;padding:11px 12px}
+  .add button{background:var(--signal);color:#111;border:none;border-radius:6px;padding:0 16px;font-size:14px;font-weight:700;cursor:pointer}
+
+  .hist{margin-top:28px;border-top:1px solid var(--line);padding-top:18px}
+  .hist .head{display:flex;justify-content:space-between;align-items:baseline}
+  .hist h2{margin:0;font-size:24px;font-weight:700}
+  .hist .tabs{display:flex;gap:4px}
+  .hist .tabs button{background:transparent;border:1px solid var(--line);color:var(--steel);border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer}
+  .hist .tabs button.on{border-color:var(--signal-dim);color:var(--signal)}
+  .hist canvas{width:100%;height:auto;display:block;margin-top:14px}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+  .kpi .v{font-size:26px;font-weight:700;line-height:1}
+  .kpi .v.on{color:var(--signal)}
+  .kpi .l{font-size:10px;color:var(--steel);letter-spacing:.1em;margin-top:4px}
+  .heat{display:grid;grid-template-columns:40px repeat(14,1fr);gap:3px;margin-top:14px;align-items:center}
+  .heat .lab{font-size:10px;color:var(--steel);letter-spacing:.08em}
+  .heat .c{aspect-ratio:1;border-radius:2px;background:var(--line)}
+  .heat .c.p{background:var(--signal-dim)}
+  .heat .c.ok{background:var(--signal)}
+  .heat .c.hoje{outline:1px solid var(--steel);outline-offset:1px}
+  footer{font-size:10px;color:var(--steel);margin-top:30px;text-align:center;letter-spacing:.1em}
+  #instalar{display:none;margin:14px auto 0;background:transparent;color:var(--signal);border:1px solid var(--signal-dim);border-radius:6px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer}
+  @media (prefers-reduced-motion:reduce){.ring,.pilar,.bat,.barra div{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">PROTOCOLO DIÁRIO</div>
+      <h1 class="disp">Modo <span>Wayne</span></h1>
+    </div>
+    <div id="data" class="mono"></div>
+  </header>
+
+  <section class="sinal">
+    <svg width="136" height="136" viewBox="0 0 136 136" aria-labelledby="sinalLabel">
+      <title id="sinalLabel">Sinal do dia</title>
+      <circle cx="68" cy="68" r="56" fill="none" stroke="var(--line)" stroke-width="6"/>
+      <circle id="ring" class="ring" cx="68" cy="68" r="56" fill="none" stroke="var(--signal)" stroke-width="6" stroke-linecap="round" transform="rotate(-90 68 68)"/>
+      <!-- morcego (silhueta original) -->
+      <g id="batG" transform="translate(68 60) scale(.135) translate(-256 -236)">
+        <path id="bat" class="bat" fill="var(--line)"
+          d="M256 200 L236 182 214 178 190 184 176 200 150 192 120 196 96 214 84 240 110 236 132 244 146 262 160 290 176 280 196 290 212 312 230 300 246 310 256 330 266 310 282 300 300 312 316 290 336 280 352 290 366 262 380 244 402 236 428 240 416 214 392 196 362 192 336 200 322 184 298 178 276 182 Z
+             M236 178 L228 150 246 176 Z M276 178 L284 150 266 176 Z"/>
+        <ellipse class="bat" id="batHead" cx="256" cy="190" rx="20" ry="20" fill="var(--line)"/>
+        <ellipse class="bat" id="batBody" cx="256" cy="260" rx="16" ry="70" fill="var(--line)"/>
+      </g>
+      <text id="contador" x="68" y="108" text-anchor="middle" fill="var(--bone)" class="disp" style="font-size:20px;font-weight:700">0/4</text>
+      <text id="estado" x="68" y="124" text-anchor="middle" fill="var(--steel)" class="mono" style="font-size:9px;letter-spacing:.1em">SINAL APAGADO</text>
+    </svg>
+    <div style="flex:1">
+      <div class="eyebrow">SEQUÊNCIA COMPLETA</div>
+      <div id="seq" class="disp seq">0 <small>dias</small></div>
+      <div id="msg" class="msg"></div>
+    </div>
+  </section>
+
+  <div id="pilares" class="pilares"></div>
+
+  <div class="campo">
+    <label class="eyebrow" for="foco">A ÚNICA COISA DE HOJE</label>
+    <input id="foco" type="text" placeholder="Se só uma coisa acontecer hoje, qual é?" autocomplete="off">
+  </div>
+
+  <section class="missao">
+    <div class="head">
+      <div><div class="eyebrow">MISSÃO</div><h2 class="disp">Empreender</h2></div>
+      <div id="pctMissao" class="disp pct">0%</div>
+    </div>
+    <div class="barra"><div id="barraMissao"></div></div>
+    <div id="metas" class="metas"></div>
+    <div class="add">
+      <input id="novaMeta" type="text" placeholder="Nova meta da missão" autocomplete="off">
+      <button id="btnAdd" class="disp">Adicionar</button>
+    </div>
+  </section>
+
+  <section class="hist">
+    <div class="head">
+      <div><div class="eyebrow">RELATÓRIO</div><h2 class="disp">Histórico</h2></div>
+      <div class="tabs mono"><button data-n="7" class="on">7D</button><button data-n="30">30D</button><button data-n="90">90D</button></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div id="kpiDias" class="disp v">0</div><div class="mono l">DIAS FECHADOS</div></div>
+      <div class="kpi"><div id="kpiTaxa" class="disp v">0%</div><div class="mono l">CONSTÂNCIA</div></div>
+      <div class="kpi"><div id="kpiRec" class="disp v">0</div><div class="mono l">RECORDE SEQ.</div></div>
+    </div>
+    <canvas id="grafico" width="880" height="320" role="img" aria-label="Pilares concluídos por dia"></canvas>
+    <div id="heat" class="heat" aria-label="Últimos 14 dias por pilar"></div>
+  </section>
+
+  <button id="instalar" class="disp">🦇 Instalar na tela inicial</button>
+  <footer class="mono" id="rodape">DADOS SALVOS NESTE APARELHO</footer>
+</div>
+
+<script>
+const PILARES=[
+  {id:"oracao",nome:"Oração",sub:"CENTRO"},
+  {id:"treino",nome:"Treino",sub:"CORPO"},
+  {id:"trabalho",nome:"Trabalho",sub:"MISSÃO"},
+  {id:"estudo",nome:"Estudo",sub:"ARSENAL"}];
+const KEY="modo-wayne:estado";
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const hoje=()=>iso(new Date());
+const ontem=s=>{const d=new Date(s+"T12:00:00");d.setDate(d.getDate()-1);return iso(d)};
+
+let estado={dias:{},metas:[
+  {id:1,titulo:"Primeiro cliente pago",prog:0},
+  {id:2,titulo:"Reserva de 6 meses de custo de vida",prog:0},
+  {id:3,titulo:"Lançar o Arquétipo",prog:0}],foco:""};
+try{const s=localStorage.getItem(KEY);if(s)estado={...estado,...JSON.parse(s)}}catch(e){}
+const salvar=()=>{try{localStorage.setItem(KEY,JSON.stringify(estado))}catch(e){}};
+
+const streak=teste=>{let n=0,d=hoje();if(teste(estado.dias[d]||{})){n=1}d=ontem(d);while(teste(estado.dias[d]||{})){n++;d=ontem(d)}return n};
+
+const $=id=>document.getElementById(id);
+const CIRC=2*Math.PI*56;
+$("ring").setAttribute("stroke-dasharray",CIRC);
+
+let render=function(){
+  const data=hoje(),dia=estado.dias[data]||{};
+  const feitos=PILARES.filter(p=>dia[p.id]).length,pct=feitos/4;
+  $("data").textContent=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"});
+  $("ring").setAttribute("stroke-dashoffset",CIRC*(1-pct));
+  $("ring").style.filter=pct===1?"drop-shadow(0 0 10px var(--signal))":"none";
+  document.querySelectorAll(".bat").forEach(b=>{b.setAttribute("fill",pct===1?"var(--signal)":feitos?"var(--signal-dim)":"var(--line)");b.style.filter=pct===1?"drop-shadow(0 0 6px rgba(242,201,76,.7))":"none"});
+  $("contador").textContent=`${feitos}/4`;
+  $("estado").textContent=pct===1?"SINAL ACESO":"SINAL APAGADO";
+  const g=streak(d=>PILARES.every(p=>d[p.id]));
+  $("seq").innerHTML=`${g} <small>dias</small>`;$("seq").classList.toggle("on",g>0);
+  $("msg").textContent=pct===1?"Dia fechado. Gotham dorme tranquila.":feitos===0?"Nada ainda hoje. Comece pelo que centra.":`Faltam ${4-feitos} para fechar o dia.`;
+
+  $("pilares").innerHTML=PILARES.map(p=>{const ok=!!dia[p.id],s=streak(d=>!!d[p.id]);
+    return `<button class="pilar ${ok?"ok":""}" data-id="${p.id}" aria-pressed="${ok}">
+      <div class="top"><span class="mono eyebrow">${p.sub}</span><span class="box"></span></div>
+      <div class="disp nome">${p.nome}</div>
+      <div class="mono streak">${s} ${s===1?"dia seguido":"dias seguidos"}</div></button>`}).join("");
+
+  if(document.activeElement!==$("foco"))$("foco").value=estado.foco||"";
+
+  const m=estado.metas,pm=m.length?Math.round(m.reduce((a,x)=>a+x.prog,0)/m.length):0;
+  $("pctMissao").textContent=pm+"%";$("barraMissao").style.width=pm+"%";
+  $("metas").innerHTML=m.length?m.map(x=>`<div class="meta" data-id="${x.id}">
+      <div class="row"><div class="t">${esc(x.titulo)}</div>
+      <div class="r"><span class="mono p ${x.prog===100?"full":""}">${x.prog}%</span><button class="x" aria-label="Remover meta">×</button></div></div>
+      <input type="range" min="0" max="100" step="5" value="${x.prog}" aria-label="Progresso de ${esc(x.titulo)}"></div>`).join("")
+    :`<div class="vazio">Sem metas. Adicione a primeira abaixo.</div>`;
+}
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+$("pilares").addEventListener("click",e=>{const b=e.target.closest(".pilar");if(!b)return;
+  const d=hoje();estado.dias[d]={...(estado.dias[d]||{}),[b.dataset.id]:!(estado.dias[d]||{})[b.dataset.id]};salvar();render();
+  if(navigator.vibrate)navigator.vibrate(12)});
+$("foco").addEventListener("input",e=>{estado.foco=e.target.value;salvar()});
+$("metas").addEventListener("input",e=>{if(e.target.type!=="range")return;const id=+e.target.closest(".meta").dataset.id;
+  const m=estado.metas.find(x=>x.id===id);m.prog=+e.target.value;salvar();
+  const row=e.target.closest(".meta").querySelector(".p");row.textContent=m.prog+"%";row.classList.toggle("full",m.prog===100);
+  const pm=Math.round(estado.metas.reduce((a,x)=>a+x.prog,0)/estado.metas.length);$("pctMissao").textContent=pm+"%";$("barraMissao").style.width=pm+"%"});
+$("metas").addEventListener("click",e=>{if(!e.target.classList.contains("x"))return;const id=+e.target.closest(".meta").dataset.id;
+  estado.metas=estado.metas.filter(x=>x.id!==id);salvar();render()});
+const addMeta=()=>{const t=$("novaMeta").value.trim();if(!t)return;estado.metas.push({id:Date.now(),titulo:t,prog:0});$("novaMeta").value="";salvar();render()};
+$("btnAdd").addEventListener("click",addMeta);
+$("novaMeta").addEventListener("keydown",e=>{if(e.key==="Enter")addMeta()});
+
+// ---------- histórico / gráficos ----------
+let janela=7;
+const diasAtras=n=>{const a=[];let d=hoje();for(let i=0;i<n;i++){a.unshift(d);d=ontem(d)}return a};
+function desenhar(){
+  const ds=diasAtras(janela),dia=d=>estado.dias[d]||{};
+  const vals=ds.map(d=>PILARES.filter(p=>dia(d)[p.id]).length);
+  const fech=vals.filter(v=>v===4).length;
+  $("kpiDias").textContent=fech;$("kpiDias").classList.toggle("on",fech>0);
+  const taxa=Math.round(vals.reduce((a,b)=>a+b,0)/(ds.length*4)*100);
+  $("kpiTaxa").textContent=taxa+"%";$("kpiTaxa").classList.toggle("on",taxa>=70);
+  const todas=Object.keys(estado.dias).sort();let rec=0,cur=0,prev=null;
+  for(const d of todas){const ok=PILARES.every(p=>dia(d)[p.id]);if(ok){cur=(prev&&ontem(d)===prev)?cur+1:1;rec=Math.max(rec,cur);prev=d}else{cur=0;prev=null}}
+  $("kpiRec").textContent=rec;$("kpiRec").classList.toggle("on",rec>=7);
+
+  const cv=$("grafico"),ctx=cv.getContext("2d"),W=cv.width,H=cv.height,padL=36,padB=34,padT=14;
+  ctx.clearRect(0,0,W,H);
+  const cs=getComputedStyle(document.documentElement),col=v=>cs.getPropertyValue(v).trim();
+  ctx.strokeStyle=col("--line");ctx.lineWidth=1;ctx.fillStyle=col("--steel");ctx.font="18px 'IBM Plex Mono',monospace";ctx.textAlign="right";
+  for(let y=0;y<=4;y++){const py=padT+(H-padT-padB)*(1-y/4);ctx.beginPath();ctx.moveTo(padL,py);ctx.lineTo(W-8,py);ctx.stroke();ctx.fillText(y,padL-10,py+6)}
+  const n=ds.length,gw=(W-padL-8)/n,bw=Math.max(2,Math.min(gw*0.62,40));
+  ctx.textAlign="center";
+  ds.forEach((d,i)=>{const v=vals[i],x=padL+gw*i+gw/2,h=(H-padT-padB)*v/4,y=H-padB-h;
+    ctx.fillStyle=v===4?col("--signal"):v>0?col("--signal-dim"):col("--line");
+    if(v===0){ctx.fillRect(x-bw/2,H-padB-3,bw,3)}else{ctx.fillRect(x-bw/2,y,bw,h)}
+    if(n<=7||i%Math.ceil(n/8)===0||i===n-1){ctx.fillStyle=col("--steel");
+      const lbl=n<=7?["D","S","T","Q","Q","S","S"][new Date(d+"T12:00:00").getDay()]:d.slice(8)+"/"+d.slice(5,7);ctx.fillText(lbl,x,H-10)}});
+
+  const h14=diasAtras(14),hj=hoje();
+  $("heat").innerHTML=PILARES.map(p=>`<div class="mono lab">${p.nome.slice(0,3).toUpperCase()}</div>`+
+    h14.map(d=>`<div class="c ${dia(d)[p.id]?"ok":""} ${d===hj?"hoje":""}" title="${d} · ${p.nome}"></div>`).join("")).join("")
+    +`<div class="mono lab">DIA</div>`+h14.map(d=>{const v=PILARES.filter(p=>dia(d)[p.id]).length;return `<div class="c ${v===4?"ok":v?"p":""} ${d===hj?"hoje":""}" title="${d} · ${v}/4"></div>`}).join("");
+}
+document.querySelector(".hist .tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  janela=+b.dataset.n;document.querySelectorAll(".hist .tabs button").forEach(x=>x.classList.toggle("on",x===b));desenhar()});
+const _render=render;render=function(){_render();desenhar()};
+
+render();
+// virada do dia enquanto aberto
+setInterval(()=>{if($("data").dataset.d!==hoje()){$("data").dataset.d=hoje();render()}},60000);
+
+// PWA
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+let deferred;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;$("instalar").style.display="block"});
+$("instalar").addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;$("instalar").style.display="none"});
+if(/iPhone|iPad/.test(navigator.userAgent)&&!navigator.standalone){$("rodape").textContent="IPHONE: COMPARTILHAR → ADICIONAR À TELA DE INÍCIO"}
+</script>
+</body>
+</html>
