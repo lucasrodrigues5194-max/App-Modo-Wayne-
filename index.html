@@ -15,16 +15,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0B0E13; --panel:#141A22; --line:#232C37; --steel:#7C8A9B;
+    --bg:#0B0E13; --panel:rgba(20,26,34,.78); --line:#26303C; --steel:#8494A6;
     --bone:#E9E4D6; --signal:#F2C94C; --signal-dim:#8A7322;
     --safe-top: env(safe-area-inset-top, 0px); --safe-bot: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--bone);font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
   body{background:
-    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(242,201,76,.10), transparent 60%),
-    repeating-linear-gradient(180deg, transparent 0 38px, rgba(255,255,255,.012) 38px 39px),
-    var(--bg)}
+    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(242,201,76,.08), transparent 60%),
+    linear-gradient(180deg,#0A0E16 0%,#0B0E13 55%,#080A0F 100%)}
+
+  /* ===== CENÁRIO: vigilante na névoa (arte original, profundidade 3D) ===== */
+  .cenario{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+  .cenario>*{position:absolute;will-change:transform}
+  .fundo{left:50%;top:0;height:100vh;width:auto;min-width:100%;transform:translateX(-50%);object-fit:cover;opacity:.85;
+    -webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 96%);mask-image:linear-gradient(180deg,#000 55%,transparent 96%)}
+  .nevoa{opacity:.5}
+  .nevoa::before{content:"";position:absolute;inset:0;border-radius:50%;filter:blur(46px)}
+  .n1{width:150vw;height:60vh;left:-30vw;top:-8vh}
+  .n1::before{background:radial-gradient(ellipse at 40% 60%, rgba(150,168,190,.34), transparent 70%);animation:deriva 46s ease-in-out infinite alternate}
+  .n2{width:130vw;height:55vh;left:-10vw;top:28vh}
+  .n2::before{background:radial-gradient(ellipse at 60% 40%, rgba(105,122,144,.30), transparent 70%);animation:deriva 34s ease-in-out infinite alternate-reverse}
+  .n3{width:160vw;height:65vh;left:-25vw;bottom:-16vh}
+  .n3::before{background:radial-gradient(ellipse at 50% 30%, rgba(170,186,205,.38), transparent 68%);animation:deriva 26s ease-in-out infinite alternate}
+  @keyframes deriva{from{transform:translate3d(-3%,0,0) scale(1)}to{transform:translate3d(3%,-2%,0) scale(1.07)}}
   .disp{font-family:'Oswald','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.06em}
   .mono{font-family:'IBM Plex Mono',monospace}
   .wrap{max-width:480px;margin:0 auto;padding:calc(22px + var(--safe-top)) 20px calc(48px + var(--safe-bot))}
@@ -102,10 +116,21 @@
   .heat .c.hoje{outline:1px solid var(--steel);outline-offset:1px}
   footer{font-size:10px;color:var(--steel);margin-top:30px;text-align:center;letter-spacing:.1em}
   #instalar{display:none;margin:14px auto 0;background:transparent;color:var(--signal);border:1px solid var(--signal-dim);border-radius:6px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer}
-  @media (prefers-reduced-motion:reduce){.ring,.pilar,.bat,.barra div{transition:none!important}}
+  .pilar,.meta,.kpi,input[type=text]{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+  @media (prefers-reduced-motion:reduce){.ring,.pilar,.bat,.barra div{transition:none!important}.nevoa::before{animation:none!important}.nevoa{transform:none!important}.fundo{transform:translateX(-50%)!important}}
 </style>
 </head>
 <body>
+<div class="cenario" aria-hidden="true">
+  <img class="fundo" data-prof="0.10" src="fundo.jpg" alt="" onerror="this.remove()">
+  <div class="nevoa n1" data-prof="0.22"></div>
+  <div class="nevoa n2" data-prof="0.35"></div>
+  <div class="nevoa n3" data-prof="0.55"></div>
+</div>
+  <div class="nevoa n1" data-prof="0.22"></div>
+  <div class="nevoa n2" data-prof="0.35"></div>
+  <div class="nevoa n3" data-prof="0.55"></div>
+</div>
 <div class="wrap">
   <header>
     <div>
@@ -291,6 +316,17 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch((
 let deferred;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;$("instalar").style.display="block"});
 $("instalar").addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;$("instalar").style.display="none"});
 if(/iPhone|iPad/.test(navigator.userAgent)&&!navigator.standalone){$("rodape").textContent="IPHONE: COMPARTILHAR → ADICIONAR À TELA DE INÍCIO"}
+
+// Parallax 3D do cenário (camadas se movem em velocidades diferentes)
+if(!matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const camadas=[...document.querySelectorAll(".cenario [data-prof]")];
+  let tick=false;
+  addEventListener("scroll",()=>{if(tick)return;tick=true;
+    requestAnimationFrame(()=>{const y=scrollY;
+      camadas.forEach(c=>{const p=+c.dataset.prof,t=`translate3d(0,${-y*p}px,0)`;
+        c.style.transform=c.classList.contains("fundo")?`translateX(-50%) ${t}`:t});
+      tick=false})},{passive:true});
+}
 </script>
 </body>
 </html>
